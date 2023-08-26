@@ -6,7 +6,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 
 app.use(cors({
-  origin: ['https://multivendor-application-frontend.vercel.app/',],
+  origin: ['https://multivendor-application-frontend.vercel.app',],
   credentials: true
 }));
 
