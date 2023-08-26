@@ -39,7 +39,10 @@ router.post("/create-shop", catchAsyncErrors(async (req, res, next) => {
 
     const createdSeller = await Shop.create(seller);
 
-    sendShopToken(createdSeller, 201, res);
+    sendShopToken(createdSeller, 201, res.status(201).json({
+      success: true,
+      message: `please check your email:- ${user.email} to activate your account!`,
+    }));
   } catch (error) {
     return next(new ErrorHandler(error.message, 400));
   }
