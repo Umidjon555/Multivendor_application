@@ -6,7 +6,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 
 app.use(cors({
-  origin: ['https://eshop-tutorial-pyri.vercel.app',],
+  origin: ['http://localhost:3000',],
   credentials: true
 }));
 
@@ -16,8 +16,9 @@ app.use("/test", (req, res) => {
   res.send("Hello world!");
 });
 
-app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
+app.use(bodyParser.json({limit: '50mb'})); 
 
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 // config
 if (process.env.NODE_ENV !== "PRODUCTION") {
   require("dotenv").config({

@@ -6,6 +6,7 @@ import { RxAvatar } from "react-icons/rx";
 import axios from "axios";
 import { server } from "../../server";
 import { toast } from "react-toastify";
+import logo from './logo192.png'
 
 const Singup = () => {
   const [email, setEmail] = useState("");
@@ -13,6 +14,7 @@ const Singup = () => {
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
   const [avatar, setAvatar] = useState(null);
+
 
   const handleFileInputChange = (e) => {
     const reader = new FileReader();
@@ -26,17 +28,19 @@ const Singup = () => {
     reader.readAsDataURL(e.target.files[0]);
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    let data = { name, email, password, avatar }
+    console.log(data)
     axios
-      .post(`${server}/user/create-user`, { name, email, password, avatar })
+      .post(`${server}/user/create-user`,  { name, email, password, avatar })
       .then((res) => {
         toast.success(res.data.message);
         setName("");
         setEmail("");
         setPassword("");
-        setAvatar();
+        setAvatar(null);
       })
       .catch((error) => {
         toast.error(error.response.data.message);

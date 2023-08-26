@@ -15,6 +15,7 @@ router.post("/create-shop", catchAsyncErrors(async (req, res, next) => {
   try {
     const { email } = req.body;
     const sellerEmail = await Shop.findOne({ email });
+
     if (sellerEmail) {
       return next(new ErrorHandler("User already exists", 400));
     }
@@ -22,7 +23,6 @@ router.post("/create-shop", catchAsyncErrors(async (req, res, next) => {
     const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
       folder: "avatars",
     });
-
 
     const seller = {
       name: req.body.name,
@@ -37,75 +37,62 @@ router.post("/create-shop", catchAsyncErrors(async (req, res, next) => {
       zipCode: req.body.zipCode,
     };
 
-    const activationToken = createActivationToken(seller);
+    const createdSeller = await Shop.create(seller);
 
-    const activationUrl = `https://eshop-tutorial-pyri.vercel.app/seller/activation/${activationToken}`;
-
-    try {
-      await sendMail({
-        email: seller.email,
-        subject: "Activate your Shop",
-        message: `Hello ${seller.name}, please click on the link to activate your shop: ${activationUrl}`,
-      });
-      res.status(201).json({
-        success: true,
-        message: `please check your email:- ${seller.email} to activate your shop!`,
-      });
-    } catch (error) {
-      return next(new ErrorHandler(error.message, 500));
-    }
+    sendShopToken(createdSeller, 201, res);
   } catch (error) {
     return next(new ErrorHandler(error.message, 400));
   }
 }));
 
-// create activation token
-const createActivationToken = (seller) => {
-  return jwt.sign(seller, process.env.ACTIVATION_SECRET, {
-    expiresIn: "5m",
-  });
-};
 
-// activate user
-router.post(
-  "/activation",
-  catchAsyncErrors(async (req, res, next) => {
-    try {
-      const { activation_token } = req.body;
+// // create activation token
+// const createActivationToken = (seller) => {
+//   return jwt.sign(seller, process.env.ACTIVATION_SECRET, {
+//     expiresIn: "10m",
+//   });
+// };
 
-      const newSeller = jwt.verify(
-        activation_token,
-        process.env.ACTIVATION_SECRET
-      );
+// // activate user
+// router.post(
+//   "/activation",
+//   catchAsyncErrors(async (req, res, next) => {
+//     try {
+//       const { activation_token } = req.body;
 
-      if (!newSeller) {
-        return next(new ErrorHandler("Invalid token", 400));
-      }
-      const { name, email, password, avatar, zipCode, address, phoneNumber } =
-        newSeller;
+//       const newSeller = jwt.verify(
+//         activation_token,
+//         process.env.ACTIVATION_SECRET
+//       );
 
-      let seller = await Shop.findOne({ email });
+//       if (!newSeller) {
+//         return next(new ErrorHandler("Invalid token", 400));
+//       }
+//       const { name, email, password, avatar, zipCode, address, phoneNumber } =
+//         newSeller;
 
-      if (seller) {
-        return next(new ErrorHandler("User already exists", 400));
-      }
+//       let seller = await Shop.findOne({ email });
 
-      seller = await Shop.create({
-        name,
-        email,
-        avatar,
-        password,
-        zipCode,
-        address,
-        phoneNumber,
-      });
+//       if (seller) {
+//         return next(new ErrorHandler("User already exists", 400));
+//       }
 
-      sendShopToken(seller, 201, res);
-    } catch (error) {
-      return next(new ErrorHandler(error.message, 500));
-    }
-  })
-);
+//       seller = await Shop.create({
+//         name,
+//         email,
+//         avatar,
+//         password,
+//         zipCode,
+//         address,
+//         phoneNumber,
+//       });
+
+//       sendShopToken(seller, 201, res);
+//     } catch (error) {
+//       return next(new ErrorHandler(error.message, 500));
+//     }
+//   })
+// );
 
 // login shop
 router.post(
